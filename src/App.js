@@ -14,6 +14,35 @@ class App extends Component {
       vehiclesToDisplay: [],
       buyersToDisplay: []
     };
+    // filterCars(){
+    //   var cars=this.state.vehicles;
+    //   if(make){
+    //     cars = cars.filter((v)=>{
+    //       return (v.make === make)
+                  
+    //     })
+    //   }
+    //   if(model){
+    //     cars = cars.filter((c)=>{
+    //       return(v.model === model)
+    //     })
+    //   }
+    //   return cars;
+    // }
+
+    // render(){
+    //  return(
+    //    {this.filterCars().map((v)=>{
+    //     return(
+    //       <div>
+    //         {v.make}
+    //         {v.model}
+    //       </div>
+    //     )
+    //    })}
+    //  )
+
+    // }
 
     this.getVehicles = this.getVehicles.bind( this );
     this.getPotentialBuyers = this.getPotentialBuyers.bind( this );
@@ -29,38 +58,57 @@ class App extends Component {
   }
 
   getVehicles() {
-    // axios (GET)
-    // setState with response -> vehiclesToDisplay
-  }
+    axios.get('https://joes-autos.herokuapp.com/api/vehicles').then( results =>{
+    toast.success("SO MANY CARS HAVE BEEN FOUND!!");
+    this.setState({'vehiclesToDisplay': results.data });
+  }).catch(()=>toast.error("KC could not find any cars..."));
+
+}
+ 
 
   getPotentialBuyers() {
-    // axios (GET)
-    // setState with response -> buyersToDisplay
+    axios.get('https://joes-autos.herokuapp.com/api/buyers').then( results =>{
+      toast.success("SO MANY BUYERS HAVE BEEN FOUND!!");
+      this.setState({'buyersToDisplay': results.data });
+    }).catch(()=>toast.error("KC could not find any suitors..."));
   }
 
   sellCar( id ) {
-    // axios (DELETE)
-    // setState with response -> vehiclesToDisplay
-  }
+    axios.delete(`https://joes-autos.herokuapp.com/api/vehicles/${id}`).then(results =>{
+      this.setState({vehiclesToDisplay:results.data.vehicles})
+    })
+    toast.success('You sold your car!')
+}
 
   filterByMake() {
     let make = this.refs.selectedMake.value;
-
-    // axios (GET)
-    // setState with response -> vehiclesToDisplay
+    let filtered = this.state.vehiclesToDisplay.filter((v)=>{
+       return (v.make === make)
+    })
+    this.setState({vehiclesToDisplay:filtered})
   }
+    
+
+   
+
 
   filterByColor() {
     let color = this.refs.selectedColor.value;
-
-    // axios (GET)
-    // setState with response -> vehiclesToDisplay
+    let filtered = this.state.vehiclesToDisplay.filter((v)=>{
+      return (v.color === color)
+   })
+   this.setState({vehiclesToDisplay:filtered})
   }
 
   updatePrice( priceChange, id ) {
-    // axios (PUT)
-    // setState with response -> vehiclesToDisplay
+    axios.put(`https://joes-autos.herokuapp.com/api/vehicles/${id}/${priceChange}`).then( results =>{
+    this.setState({
+      vehiclesToDisplay: results.data.vehicles
+    })
   }
+    )
+  }
+
 
   addCar() {
     let newCar = {
@@ -70,9 +118,11 @@ class App extends Component {
       year: this.refs.year.value,
       price: this.refs.price.value
     };
-
-    // axios (POST)
-    // setState with response -> vehiclesToDisplay
+    
+    axios.post('https://joes-autos.herokuapp.com/api/vehicles/',newCar).then(results=>{
+      this.setState({vehiclesToDisplay:results.data})
+    })
+    toast.success('New car added!')
   }
 
   addBuyer() {
@@ -82,28 +132,39 @@ class App extends Component {
       address: this.refs.address.value
     };
 
-    //axios (POST)
-    // setState with response -> buyersToDisplay
+    axios.post('https://joes-autos.herokuapp.com/api/buyers/',newBuyer).then(results=>{
+      this.setState({buyersToDisplay:results.data})
+    })
+    toast.success('New buyer added!')
   }
 
   deleteBuyer( id ) {
-    // axios (DELETE)
-    //setState with response -> buyersToDisplay
+    axios.delete(`https://joes-autos.herokuapp.com/api/buyers/${id}`).then(results =>{
+      this.setState({buyersToDisplay:results.data.buyers})
+    })
+    toast.success("The home slice is no longer interested!")
   }
 
   nameSearch() {
     let searchLetters = this.refs.searchLetters.value;
-
+    let filtered = this.state.buyersToDisplay.filter((v)=>{
+      return (v.name.includes(searchLetters))
+   })
+   this.setState({buyersToDisplay:filtered})
     // axios (GET)
     // setState with response -> buyersToDisplay
   }
 
   byYear() {
     let year = this.refs.searchYear.value;
+    let filtered = this.state.vehiclesToDisplay.filter((v)=>{
+      return (v.year >= year)
+    })
+    this.setState({vehiclesToDisplay:filtered})
 
-    // axios (GET)
-    // setState with response -> vehiclesToDisplay
   }
+
+ 
 
   // Do not edit the code below
   resetData( dataToReset ) {
